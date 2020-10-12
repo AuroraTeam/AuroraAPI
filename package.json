@@ -1,0 +1,39 @@
+{
+  "name": "aurora-api",
+  "version": "0.1.0",
+  "description": "JS/TS API implementation for Aurora Launcher",
+  "main": "./src/index.js",
+  "browser": "./dist/aurora-api.js",
+  "scripts": {
+    "test": "node example/node-example.js",
+    "dev-test": "node dev-tests/node.js",
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "publish": "npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AuroraTeam/AuroraAPI.git"
+  },
+  "author": "AuroraTeam",
+  "contributors": [
+    "JoCat (https://github.com/JoCat)"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AuroraTeam/AuroraAPI/issues"
+  },
+  "homepage": "https://github.com/AuroraTeam/AuroraAPI#readme",
+  "dependencies": {
+    "get-random-values": "^1.2.2",
+    "isomorphic-ws": "^4.0.1",
+    "ws": "^7.3.1"
+  },
+  "devDependencies": {
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12"
+  },
+  "directories": {
+    "example": "example"
+  }
+}
