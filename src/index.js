@@ -1,10 +1,10 @@
 const WebSocket = require('isomorphic-ws');
-const genRandUUIDv4 = require('./Utils/genRandUUIDv4')
+const getRandUUIDv4 = require('./Utils/getRandUUIDv4')
 
 module.exports = class AuroraAPI {
     constructor() {
         this.requestMap = new Map();
-        this.genRandUUIDv4 = genRandUUIDv4;
+        this.getRandUUIDv4 = getRandUUIDv4;
     }
 
     connect(url) {
@@ -36,9 +36,9 @@ module.exports = class AuroraAPI {
     sendRequest(type, data, callback, errorCallback) {
         if (!this.checkValidRequestType(type)) return console.error('Не валидный type');
         data.type = type;
-        data.requestUUID = this.genRandUUIDv4();
-        this.requestMap.set(data.requestUUID, event => {
-            if (event.type === "error") {
+        data.uuid = this.getRandUUIDv4();
+        this.requestMap.set(data.uuid, event => {
+            if (event.code !== undefined) {
                 if (errorCallback !== undefined) errorCallback(event);
             } else callback(event);
         });
@@ -67,11 +67,11 @@ module.exports = class AuroraAPI {
     onMessage(event) {
         const obj = JSON.parse(event.data);
         const requestMap = this.AuroraAPI.requestMap;
-        if (obj.requestUUID && requestMap.has(obj.requestUUID)) {
-            requestMap.get(obj.requestUUID)(obj);
-            requestMap.delete(obj.requestUUID);
+        if (obj.uuid && requestMap.has(obj.uuid)) {
+            requestMap.get(obj.uuid)(obj);
+            requestMap.delete(obj.uuid);
         } else {
-            if (obj.type === "error") console.error(obj.error);
+            if (event.code !== undefined) console.error(obj.error);
             else console.dir(obj);
         }
     }
