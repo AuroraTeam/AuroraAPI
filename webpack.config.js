@@ -13,11 +13,23 @@ module.exports = mode.map(c => {
         mode: c.mode,
         devtool: 'source-map',
         target: 'web',
+        entry: path.resolve(__dirname, 'src', 'index.ts'),
         output: {
             path: path.resolve(__dirname, 'dist'),
             filename: c.filename,
-            library: 'AuroraApi',
+            library: 'AuroraAPI',
             libraryTarget: 'umd'
+        },
+        resolve: {
+            extensions: [ '.ts' ],
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.ts$/,
+                    loader: "ts-loader"
+                }
+            ]
         }
     }
 })

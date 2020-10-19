@@ -13,7 +13,7 @@ const log = {
 }
 
 // Api usage example
-const api = new AuroraApi();
+const api = new AuroraAPI();
 api.onOpen = () => {
     log.append('Соединение установлено');
 }
