@@ -1,79 +1,91 @@
 import * as WebSocket from 'isomorphic-ws'
 import { v4 as uuidv4 } from 'uuid'
-import { Request } from '../types/Request';
-import { Response } from '../types/Response';
-import { ResponseError } from '../types/ResponseError';
-import { ResponseEvent } from '../types/ResponseEvent';
+import { Request } from '../types/Request'
+import { Response, ResponseError } from '../types/Response'
+import { AuroraWebSocket, WebSocketErrorEvent, WebSocketMessageEvent } from '../types/WebSocket'
+import { MessageEmitter } from './MessageEmitter'
 
 export class AuroraAPI {
-    requestsMap: Map<string, ResponseEvent> = new Map();
-    socket: WebSocket & { api?: AuroraAPI }
+    messageEmitter: MessageEmitter = new MessageEmitter()
+    socket: AuroraWebSocket
 
-    connect(url: string): Promise<AuroraAPI | WebSocket.ErrorEvent> {
-        return new Promise((resolve, reject) => {
-            this.socket = new WebSocket(url);
+    connect(url: string, callback?: (error: null | WebSocketErrorEvent, api?: AuroraAPI) => void): void | Promise<AuroraAPI | WebSocketErrorEvent> {
+        this.socket = new WebSocket(url)
+        this.socket.onclose = this.onClose
+        this.socket.onmessage = this.onMessage
+        this.socket.api = this
+
+        if (callback !== undefined) { // Callback style
             this.socket.onopen = () => {
-                this.onOpen();
-                resolve(this);
-            };
-            this.socket.onerror = (err) => {
-                this.onError();
-                reject(err);
-            };
-            this.socket.onclose = this.onClose;
-            this.socket.onmessage = this.onMessage;
-            this.socket.api = this;
-        });
+                this.onOpen()
+                callback(null, this)
+            }
+            this.socket.onerror = (error) => {
+                this.onError(error)
+                callback(error)
+            }
+        } else { // Promise style
+            return new Promise((resolve, reject) => {
+                this.socket.onopen = () => {
+                    this.onOpen()
+                    resolve(this)
+                }
+                this.socket.onerror = (err) => {
+                    this.onError(err)
+                    reject(err)
+                }
+            })
+        }
     }
 
-    close(): void {
-        this.socket.close();
+    close(code?: number, data?: string): void {
+        this.socket.close(code, data)
     }
 
     hasConnected(): boolean {
-        if (!this.socket) return false;
-        return this.socket.readyState === this.socket.OPEN;
+        if (!this.socket) return false
+        return this.socket.readyState === this.socket.OPEN
     }
 
-    sendRequest(type: string, data: Request, callback: (data: Response) => void, errorCallback: (data: ResponseError) => void) {
-        data.type = type;
-        data.uuid = uuidv4();
+    send(type: string, data: Request, callback?: (error: null | ResponseError, data?: Response) => void): void | Promise<Response | ResponseError> {
+        data.type = type
+        data.uuid = uuidv4()
 
-        this.requestsMap.set(data.uuid, (data: Response | ResponseError): void => {
-            if ((data as ResponseError).code !== undefined) {
-                if (errorCallback !== undefined) errorCallback(data as ResponseError);
-            } else callback(data as Response);
-        });
-        this.socket.send(JSON.stringify(data));
+        this.socket.send(JSON.stringify(data))
+        if (callback !== undefined) { // Callback style
+            this.messageEmitter.addListener(data.uuid, (data: Response | ResponseError): void => {
+                if ((data as ResponseError).code !== undefined) callback(data as ResponseError)
+                else callback(null, data as Response)
+            })
+        } else { // Promise style
+            return new Promise((resolve, reject) => {
+                this.messageEmitter.addListener(data.uuid, (data: Response | ResponseError): void => {
+                    if ((data as ResponseError).code !== undefined) reject(data as ResponseError)
+                    else resolve(data as Response)
+                })
+            })
+        }
     }
 
     /* Events */
     onOpen(): void {
-        console.log('Соединение установлено');
+        console.log('Соединение установлено')
     }
 
     onClose(event: WebSocket.CloseEvent) {
-        if (event.wasClean) return console.log('Соединение закрыто');
-        if (event.code === 1006) console.error('Разрыв соединения');
+        if (event.wasClean) return console.log('Соединение закрыто')
+        if (event.code === 1006) console.error('Разрыв соединения')
         else {
-            console.error('Неизвестная ошибка');
-            console.dir(event);
+            console.error('Неизвестная ошибка')
+            console.dir(event)
         }
     }
 
-    onMessage(this: WebSocket & { api?: AuroraAPI }, event: WebSocket.MessageEvent) {
-        const data: Response | ResponseError = JSON.parse(event.data as string);
-        const requestsMap = this.api.requestsMap;
-        if (data.uuid !== undefined && requestsMap.has(data.uuid)) {
-            requestsMap.get(data.uuid)(data);
-            requestsMap.delete(data.uuid);
-        } else {
-            if ((data as ResponseError).code !== undefined) console.error(data);
-            else console.dir(data);
-        }
+    onMessage(this: AuroraWebSocket, event: WebSocketMessageEvent) {
+        this.api.messageEmitter.emit(JSON.parse(event.data as string))
     }
 
-    onError() {
-        console.error('Ошибка при подключеннии!');
+    onError(event: WebSocketErrorEvent) {
+        console.error("WebSocket error observed:", event);
     }
 }

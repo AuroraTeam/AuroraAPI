@@ -6,6 +6,7 @@
   "browser": "./dist/aurora-api.js",
   "scripts": {
     "test": "node example/node-example.js",
+    "dev": "tsc && node example/node-example.js",
     "build:node": "tsc",
     "build:browser": "webpack",
     "publish": "npm publish"

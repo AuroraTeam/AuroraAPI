@@ -22,16 +22,17 @@ api.onClose = (e) => {
     if (e.code === 1006) log.append('Разрыв соединения');
 }
 api.onError = () => {
-    log.append('Ошибка при подключеннии!');
+    log.append('Ошибка при подключении!');
 }
-api.connect(wsUrl)
-.then(() => {
-    api.sendRequest('ping', {}, (auth) => {
-        log.appendData(auth);
-        api.close();
-    }, (error) => {
+
+(async () => {
+    try {
+        await api.connect(wsUrl);
+        const test = await api.send('ping', {});
+        log.appendData(test);
+    } catch (error) {
         log.appendData(error);
+    } finally {
         api.close();
-    })
-})
-.catch(console.error);
+    }
+})();

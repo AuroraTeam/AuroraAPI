@@ -5,14 +5,14 @@ const wsUrl = 'ws://localhost:1370/';
 
 // Api usage example
 const api = new AuroraAPI();
-api.connect(wsUrl)
-.then(() => {
-    api.sendRequest('ping', {}, (auth) => {
-        console.log(auth);
+(async () => {
+    try {
+        await api.connect(wsUrl);
+        const test = await api.send('ping', {});
+        console.log(test);
+    } catch (error) {
+        console.error(error);
+    } finally {
         api.close();
-    }, (error) => {
-        console.log(error);
-        api.close();
-    })
-})
-.catch(console.error);
+    }
+})();
