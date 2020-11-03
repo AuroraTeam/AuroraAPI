@@ -1000,20 +1000,17 @@ module.exports = g;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AuroraAPI = void 0;
-const WebSocket = __webpack_require__(/*! isomorphic-ws */ "./node_modules/isomorphic-ws/browser.js");
 const uuid_1 = __webpack_require__(/*! uuid */ "./node_modules/uuid/dist/esm-browser/index.js");
+const AuroraWebSocket_1 = __webpack_require__(/*! ./AuroraWebSocket */ "./src/classes/AuroraWebSocket.ts");
 const MessageEmitter_1 = __webpack_require__(/*! ./MessageEmitter */ "./src/classes/MessageEmitter.ts");
 class AuroraAPI {
     constructor() {
-        this.messageEmitter = new MessageEmitter_1.MessageEmitter();
-        this.socket = null;
+        this.messageEmitter = new MessageEmitter_1.default();
     }
     connect(url, callback) {
-        this.socket = new WebSocket(url);
+        this.socket = new AuroraWebSocket_1.default(url, this);
         this.socket.onclose = this.onClose;
         this.socket.onmessage = this.onMessage;
-        this.socket.api = this;
         if (callback !== undefined) { // Callback style
             this.socket.onopen = () => {
                 this.onOpen();
@@ -1038,7 +1035,8 @@ class AuroraAPI {
         }
     }
     close(code, data) {
-        this.socket.close(code, data);
+        if (this.socket)
+            this.socket.close(code, data);
     }
     hasConnected() {
         if (!this.socket)
@@ -1046,6 +1044,8 @@ class AuroraAPI {
         return this.socket.readyState === this.socket.OPEN;
     }
     send(type, data, callback) {
+        if (!this.socket)
+            return console.error("WebSocket not connected");
         const obj = {
             type: type,
             uuid: uuid_1.v4(),
@@ -1073,15 +1073,15 @@ class AuroraAPI {
     }
     /* Events */
     onOpen() {
-        console.log('Соединение установлено');
+        console.log('Connection established');
     }
     onClose(event) {
         if (event.wasClean)
-            return console.log('Соединение закрыто');
+            return console.log('Connection closed');
         if (event.code === 1006)
-            console.error('Разрыв соединения');
+            console.error('Break connection');
         else {
-            console.error('Неизвестная ошибка');
+            console.error('Unknown error');
             console.dir(event);
         }
     }
@@ -1092,7 +1092,29 @@ class AuroraAPI {
         console.error("WebSocket error observed:", event);
     }
 }
-exports.AuroraAPI = AuroraAPI;
+exports.default = AuroraAPI;
+
+
+/***/ }),
+
+/***/ "./src/classes/AuroraWebSocket.ts":
+/*!****************************************!*\
+  !*** ./src/classes/AuroraWebSocket.ts ***!
+  \****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const WebSocket = __webpack_require__(/*! isomorphic-ws */ "./node_modules/isomorphic-ws/browser.js");
+class AuroraWebSocket extends WebSocket {
+    constructor(address, api) {
+        super(address);
+        this.api = api;
+    }
+}
+exports.default = AuroraWebSocket;
 
 
 /***/ }),
@@ -1107,7 +1129,6 @@ exports.AuroraAPI = AuroraAPI;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MessageEmitter = void 0;
 class MessageEmitter {
     constructor() {
         this.listeners = new Map();
@@ -1128,7 +1149,7 @@ class MessageEmitter {
         }
     }
 }
-exports.MessageEmitter = MessageEmitter;
+exports.default = MessageEmitter;
 
 
 /***/ }),
@@ -1142,12 +1163,13 @@ exports.MessageEmitter = MessageEmitter;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 const AuroraAPI_1 = __webpack_require__(/*! ./classes/AuroraAPI */ "./src/classes/AuroraAPI.ts");
-module.exports = AuroraAPI_1.AuroraAPI;
+exports.default = AuroraAPI_1.default;
 
 
 /***/ })
 
-/******/ });
+/******/ })["default"];
 });
 //# sourceMappingURL=aurora-api.js.map

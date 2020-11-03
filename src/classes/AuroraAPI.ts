@@ -2,18 +2,18 @@ import * as WebSocket from 'isomorphic-ws'
 import { v4 as uuidv4 } from 'uuid'
 import { Request } from '../types/Request'
 import { Response, ResponseError } from '../types/Response'
-import { AuroraWebSocket, WebSocketErrorEvent, WebSocketMessageEvent } from '../types/WebSocket'
-import { MessageEmitter } from './MessageEmitter'
+import AuroraWebSocket from './AuroraWebSocket'
+import { WebSocketErrorEvent, WebSocketMessageEvent } from '../types/WebSocket'
+import MessageEmitter from './MessageEmitter'
 
-export class AuroraAPI {
+export default class AuroraAPI {
     messageEmitter: MessageEmitter = new MessageEmitter()
-    socket: AuroraWebSocket | null = null
+    socket?: AuroraWebSocket
 
     connect(url: string, callback?: (error: null | WebSocketErrorEvent, api?: AuroraAPI) => void): void | Promise<AuroraAPI | WebSocketErrorEvent> {
-        this.socket = new WebSocket(url)
+        this.socket = new AuroraWebSocket(url, this)
         this.socket.onclose = this.onClose
         this.socket.onmessage = this.onMessage
-        this.socket.api = this
 
         if (callback !== undefined) { // Callback style
             this.socket.onopen = () => {
@@ -26,11 +26,11 @@ export class AuroraAPI {
             }
         } else { // Promise style
             return new Promise((resolve, reject) => {
-                this.socket.onopen = () => {
+                (this.socket as AuroraWebSocket).onopen = () => {
                     this.onOpen()
                     resolve(this)
                 }
-                this.socket.onerror = (err) => {
+                (this.socket as AuroraWebSocket).onerror = (err) => {
                     this.onError(err)
                     reject(err)
                 }
@@ -39,7 +39,7 @@ export class AuroraAPI {
     }
 
     close(code?: number, data?: string): void {
-        this.socket.close(code, data)
+        if (this.socket) this.socket.close(code, data)
     }
 
     hasConnected(): boolean {
@@ -48,6 +48,8 @@ export class AuroraAPI {
     }
 
     send(type: string, data: object, callback?: (error: null | ResponseError, data?: Response) => void): void | Promise<Response | ResponseError> {
+        if (!this.socket) return console.error("WebSocket not connected");
+        
         const obj: Request = {
             type: type,
             uuid: uuidv4(),
@@ -72,14 +74,14 @@ export class AuroraAPI {
 
     /* Events */
     onOpen(): void {
-        console.log('Соединение установлено')
+        console.log('Connection established')
     }
 
     onClose(event: WebSocket.CloseEvent) {
-        if (event.wasClean) return console.log('Соединение закрыто')
-        if (event.code === 1006) console.error('Разрыв соединения')
+        if (event.wasClean) return console.log('Connection closed')
+        if (event.code === 1006) console.error('Break connection')
         else {
-            console.error('Неизвестная ошибка')
+            console.error('Unknown error')
             console.dir(event)
         }
     }

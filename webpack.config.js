@@ -18,6 +18,7 @@ module.exports = mode.map(c => {
             path: path.resolve(__dirname, 'dist'),
             filename: c.filename,
             library: 'AuroraAPI',
+            libraryExport: 'default',
             libraryTarget: 'umd'
         },
         resolve: {

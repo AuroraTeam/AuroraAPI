@@ -1,6 +1,6 @@
 import { Response, ResponseError, ResponseEvent } from "../types/Response"
 
-export class MessageEmitter {
+export default class MessageEmitter {
     listeners: Map<string, ResponseEvent> = new Map()
 
     addListener(uuid: string, listener: ResponseEvent) {
@@ -9,7 +9,7 @@ export class MessageEmitter {
 
     emit(data: Response | ResponseError) {
         if (data.uuid !== undefined && this.listeners.has(data.uuid)) {
-            this.listeners.get(data.uuid)(data)
+            (this.listeners.get(data.uuid) as ResponseEvent)(data)
             this.listeners.delete(data.uuid)
         } else {
             if ((data as ResponseError).code !== undefined) console.error(data)

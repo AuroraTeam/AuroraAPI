@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MessageEmitter = void 0;
 class MessageEmitter {
     constructor() {
         this.listeners = new Map();
@@ -21,5 +20,5 @@ class MessageEmitter {
         }
     }
 }
-exports.MessageEmitter = MessageEmitter;
+exports.default = MessageEmitter;
 //# sourceMappingURL=MessageEmitter.js.map

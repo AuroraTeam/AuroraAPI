@@ -1,4 +1,4 @@
-const AuroraAPI = require('../build/index');
+const AuroraAPI = require('../build/index').default;
 
 // User data
 const wsUrl = 'ws://localhost:1370/';
