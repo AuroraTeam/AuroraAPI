@@ -1,3 +1,3 @@
-import AuroraAPI from './classes/AuroraAPI'
+import AuroraAPI from "./classes/AuroraAPI"
 
 export default AuroraAPI

@@ -9,6 +9,7 @@ class MessageEmitter {
     }
     emit(data) {
         if (data.uuid !== undefined && this.listeners.has(data.uuid)) {
+            ;
             this.listeners.get(data.uuid)(data);
             this.listeners.delete(data.uuid);
         }

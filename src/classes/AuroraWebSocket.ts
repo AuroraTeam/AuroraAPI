@@ -1,6 +1,8 @@
-import * as url from 'url'
-import * as WebSocket from 'isomorphic-ws'
-import AuroraAPI from './AuroraAPI'
+import * as url from "url"
+
+import * as WebSocket from "isomorphic-ws"
+
+import AuroraAPI from "./AuroraAPI"
 
 export default class AuroraWebSocket extends WebSocket {
     api: AuroraAPI

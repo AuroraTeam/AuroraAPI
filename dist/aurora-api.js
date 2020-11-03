@@ -1011,7 +1011,8 @@ class AuroraAPI {
         this.socket = new AuroraWebSocket_1.default(url, this);
         this.socket.onclose = this.onClose;
         this.socket.onmessage = this.onMessage;
-        if (callback !== undefined) { // Callback style
+        if (callback !== undefined) {
+            // Callback style
             this.socket.onopen = () => {
                 this.onOpen();
                 callback(null, this);
@@ -1021,8 +1022,10 @@ class AuroraAPI {
                 callback(error);
             };
         }
-        else { // Promise style
+        else {
+            // Promise style
             return new Promise((resolve, reject) => {
+                ;
                 this.socket.onopen = () => {
                     this.onOpen();
                     resolve(this);
@@ -1049,10 +1052,11 @@ class AuroraAPI {
         const obj = {
             type: type,
             uuid: uuid_1.v4(),
-            data: data
+            data: data,
         };
         this.socket.send(JSON.stringify(obj));
-        if (callback !== undefined) { // Callback style
+        if (callback !== undefined) {
+            // Callback style
             this.messageEmitter.addListener(obj.uuid, (data) => {
                 if (data.code !== undefined)
                     callback(data);
@@ -1060,7 +1064,8 @@ class AuroraAPI {
                     callback(null, data);
             });
         }
-        else { // Promise style
+        else {
+            // Promise style
             return new Promise((resolve, reject) => {
                 this.messageEmitter.addListener(obj.uuid, (data) => {
                     if (data.code !== undefined)
@@ -1073,15 +1078,15 @@ class AuroraAPI {
     }
     /* Events */
     onOpen() {
-        console.log('Connection established');
+        console.log("Connection established");
     }
     onClose(event) {
         if (event.wasClean)
-            return console.log('Connection closed');
+            return console.log("Connection closed");
         if (event.code === 1006)
-            console.error('Break connection');
+            console.error("Break connection");
         else {
-            console.error('Unknown error');
+            console.error("Unknown error");
             console.dir(event);
         }
     }
@@ -1138,6 +1143,7 @@ class MessageEmitter {
     }
     emit(data) {
         if (data.uuid !== undefined && this.listeners.has(data.uuid)) {
+            ;
             this.listeners.get(data.uuid)(data);
             this.listeners.delete(data.uuid);
         }
