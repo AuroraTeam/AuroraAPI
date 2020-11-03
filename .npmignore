@@ -2,4 +2,7 @@ node_modules
 package-lock.json
 example
 .editorconfig
-dev-tests
+.prettierrc.json
+tsconfig.json
+webpack.config.js
+src
