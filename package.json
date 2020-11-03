@@ -1,6 +1,6 @@
 {
     "name": "aurora-api",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "JS/TS API implementation for Aurora Launcher",
     "main": "./build/index.js",
     "browser": "./dist/aurora-api.js",
