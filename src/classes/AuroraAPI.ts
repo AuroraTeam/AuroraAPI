@@ -7,7 +7,7 @@ import { MessageEmitter } from './MessageEmitter'
 
 export class AuroraAPI {
     messageEmitter: MessageEmitter = new MessageEmitter()
-    socket: AuroraWebSocket
+    socket: AuroraWebSocket | null = null
 
     connect(url: string, callback?: (error: null | WebSocketErrorEvent, api?: AuroraAPI) => void): void | Promise<AuroraAPI | WebSocketErrorEvent> {
         this.socket = new WebSocket(url)
@@ -47,19 +47,22 @@ export class AuroraAPI {
         return this.socket.readyState === this.socket.OPEN
     }
 
-    send(type: string, data: Request, callback?: (error: null | ResponseError, data?: Response) => void): void | Promise<Response | ResponseError> {
-        data.type = type
-        data.uuid = uuidv4()
+    send(type: string, data: object, callback?: (error: null | ResponseError, data?: Response) => void): void | Promise<Response | ResponseError> {
+        const obj: Request = {
+            type: type,
+            uuid: uuidv4(),
+            data: data
+        }
 
-        this.socket.send(JSON.stringify(data))
+        this.socket.send(JSON.stringify(obj))
         if (callback !== undefined) { // Callback style
-            this.messageEmitter.addListener(data.uuid, (data: Response | ResponseError): void => {
+            this.messageEmitter.addListener(obj.uuid, (data: Response | ResponseError): void => {
                 if ((data as ResponseError).code !== undefined) callback(data as ResponseError)
                 else callback(null, data as Response)
             })
         } else { // Promise style
             return new Promise((resolve, reject) => {
-                this.messageEmitter.addListener(data.uuid, (data: Response | ResponseError): void => {
+                this.messageEmitter.addListener(obj.uuid, (data: Response | ResponseError): void => {
                     if ((data as ResponseError).code !== undefined) reject(data as ResponseError)
                     else resolve(data as Response)
                 })

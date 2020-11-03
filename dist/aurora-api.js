@@ -1007,6 +1007,7 @@ const MessageEmitter_1 = __webpack_require__(/*! ./MessageEmitter */ "./src/clas
 class AuroraAPI {
     constructor() {
         this.messageEmitter = new MessageEmitter_1.MessageEmitter();
+        this.socket = null;
     }
     connect(url, callback) {
         this.socket = new WebSocket(url);
@@ -1045,11 +1046,14 @@ class AuroraAPI {
         return this.socket.readyState === this.socket.OPEN;
     }
     send(type, data, callback) {
-        data.type = type;
-        data.uuid = uuid_1.v4();
-        this.socket.send(JSON.stringify(data));
+        const obj = {
+            type: type,
+            uuid: uuid_1.v4(),
+            data: data
+        };
+        this.socket.send(JSON.stringify(obj));
         if (callback !== undefined) { // Callback style
-            this.messageEmitter.addListener(data.uuid, (data) => {
+            this.messageEmitter.addListener(obj.uuid, (data) => {
                 if (data.code !== undefined)
                     callback(data);
                 else
@@ -1058,7 +1062,7 @@ class AuroraAPI {
         }
         else { // Promise style
             return new Promise((resolve, reject) => {
-                this.messageEmitter.addListener(data.uuid, (data) => {
+                this.messageEmitter.addListener(obj.uuid, (data) => {
                     if (data.code !== undefined)
                         reject(data);
                     else
