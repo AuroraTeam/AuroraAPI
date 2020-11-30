@@ -1,28 +1,31 @@
-const path = require('path');
+const path = require('path')
 
-const mode = [{
+// Web
+let mode = [{
     mode: 'production',
+    devtool: 'source-map',
     filename: 'aurora-api.min.js',
 },{
     mode: 'development',
+    devtool: 'inline-source-map',
     filename: 'aurora-api.js',
 }]
 
-module.exports = mode.map(c => {
+mode = mode.map(c => {
     return {
         mode: c.mode,
-        devtool: 'source-map',
+        devtool: c.devtool,
         target: 'web',
         entry: path.resolve(__dirname, 'src', 'index.ts'),
         output: {
             path: path.resolve(__dirname, 'dist'),
             filename: c.filename,
             library: 'AuroraAPI',
-            libraryExport: 'default',
+            libraryExport: 'AuroraAPI',
             libraryTarget: 'umd'
         },
         resolve: {
-            extensions: [ '.ts' ],
+            extensions: [ '.ts', '.js' ],
         },
         module: {
             rules: [
@@ -34,3 +37,29 @@ module.exports = mode.map(c => {
         }
     }
 })
+
+// Node
+mode.push({
+    mode: 'development',
+    devtool: 'source-map',
+    target: 'node',
+    entry: path.resolve(__dirname, 'src', 'index.ts'),
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'aurora-api.node.js',
+        libraryTarget: 'commonjs'
+    },
+    resolve: {
+        extensions: [ '.ts', '.js' ],
+    },
+    module: {
+        rules: [
+            {
+                test: /\.ts$/,
+                loader: "ts-loader"
+            }
+        ]
+    }
+})
+
+module.exports = mode

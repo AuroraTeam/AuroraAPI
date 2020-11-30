@@ -1,4 +1,6 @@
-const AuroraAPI = require('../build/index').default;
+const AuroraAPI = require('../dist/aurora-api.node').AuroraAPI;
+// Для прода
+// const AuroraAPI = require('aurora-api').AuroraAPI;
 
 // User data
 const wsUrl = 'ws://localhost:1370/';

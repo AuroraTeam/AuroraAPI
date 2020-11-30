@@ -1,10 +1,15 @@
 {
     "compilerOptions": {
         "target": "ES6",
-        "module": "CommonJS",
-        "sourceMap": true,
+        "module": "ES6",
         "strict": true,
-        "outDir": "./build",
-        "declaration": true
-    }
+        "sourceMap": true,
+        "declaration": true,
+        "declarationDir": "dist/types",
+        "removeComments": true,
+        "moduleResolution": "node"
+    },
+    "include": [
+        "src"
+    ]
 }

@@ -11,6 +11,8 @@ export default class AuroraAPI {
     messageEmitter: MessageEmitter = new MessageEmitter()
     socket?: AuroraWebSocket
 
+    constructor() { /* Ебал рот тех тайпингов */ }
+
     connect(
         url: string,
         callback?: (error: null | WebSocketErrorEvent, api?: AuroraAPI) => void
@@ -55,7 +57,7 @@ export default class AuroraAPI {
 
     send(
         type: string,
-        data: object,
+        data?: object,
         callback?: (error: null | ResponseError, data?: Response) => void
     ): void | Promise<Response | ResponseError> {
         if (!this.socket) return console.error("WebSocket not connected")
@@ -63,7 +65,7 @@ export default class AuroraAPI {
         const obj: Request = {
             type: type,
             uuid: uuidv4(),
-            data: data,
+            data: data as object,
         }
 
         this.socket.send(JSON.stringify(obj))
