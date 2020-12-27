@@ -4344,12 +4344,13 @@ __webpack_require__.r(__webpack_exports__);
 class AuroraAPI {
     constructor() {
         this.messageEmitter = new _MessageEmitter__WEBPACK_IMPORTED_MODULE_2__["default"]();
-    }
+    } // Так надо :D
     connect(url, callback) {
         this.socket = new _AuroraWebSocket__WEBPACK_IMPORTED_MODULE_1__["default"](url, this);
         this.socket.onclose = this.onClose;
         this.socket.onmessage = this.onMessage;
         if (callback !== undefined) {
+            // Callback style
             this.socket.onopen = () => {
                 this.onOpen();
                 callback(null, this);
@@ -4360,6 +4361,7 @@ class AuroraAPI {
             };
         }
         else {
+            // Promise style
             return new Promise((resolve, reject) => {
                 ;
                 this.socket.onopen = () => {
@@ -4392,6 +4394,7 @@ class AuroraAPI {
         };
         this.socket.send(JSON.stringify(obj));
         if (callback !== undefined) {
+            // Callback style
             this.messageEmitter.addListener(obj.uuid, (data) => {
                 if (data.code !== undefined)
                     callback(data);
@@ -4400,6 +4403,7 @@ class AuroraAPI {
             });
         }
         else {
+            // Promise style
             return new Promise((resolve, reject) => {
                 this.messageEmitter.addListener(obj.uuid, (data) => {
                     if (data.code !== undefined)
@@ -4410,6 +4414,7 @@ class AuroraAPI {
             });
         }
     }
+    /* Events */
     onOpen() {
         console.log("Connection established");
     }

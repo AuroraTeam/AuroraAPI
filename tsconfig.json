@@ -6,7 +6,6 @@
         "sourceMap": true,
         "declaration": true,
         "declarationDir": "dist/types",
-        "removeComments": true,
         "moduleResolution": "node"
     },
     "include": [
