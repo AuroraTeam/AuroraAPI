@@ -11,7 +11,24 @@ export default class AuroraAPI {
     messageEmitter: MessageEmitter = new MessageEmitter()
     socket?: AuroraWebSocket
 
-    constructor() { /* Ебал рот тех тайпингов */ }
+    constructor() {} // Так надо :D
+
+    /**
+     * Подключение к API (Callback style)
+     * @param url Адрес API
+     * @param callback Функция обратного вызова (обработка подключения)
+     */
+    connect(
+        url: string,
+        callback: (error: null | WebSocketErrorEvent, api?: AuroraAPI) => void
+    ): void
+    /**
+     * Подключение к API (Promise style)
+     * @param url Адрес API
+     */
+    connect(
+        url: string
+    ): Promise<AuroraAPI | WebSocketErrorEvent>
 
     connect(
         url: string,
@@ -55,9 +72,30 @@ export default class AuroraAPI {
         return this.socket.readyState === this.socket.OPEN
     }
 
+    /**
+     * Отправка запроса (Callback style)
+     * @param type Тип реквеста
+     * @param data Данные
+     * @param callback Функция обратного вызова (обработка ответа)
+     */
+    send(
+        type: string,
+        data: object | undefined,
+        callback: (error: null | ResponseError, data?: Response) => void
+    ): void
+    /**
+     * Отправка запроса (Promise style)
+     * @param type Тип реквеста
+     * @param data Данные
+     */
     send(
         type: string,
         data?: object,
+    ): Promise<Response | ResponseError>
+
+    send(
+        type: string,
+        data: object = {},
         callback?: (error: null | ResponseError, data?: Response) => void
     ): void | Promise<Response | ResponseError> {
         if (!this.socket) return console.error("WebSocket not connected")
@@ -65,7 +103,7 @@ export default class AuroraAPI {
         const obj: Request = {
             type: type,
             uuid: uuidv4(),
-            data: data as object,
+            data: data,
         }
 
         this.socket.send(JSON.stringify(obj))

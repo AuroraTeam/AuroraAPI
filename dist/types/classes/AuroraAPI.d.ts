@@ -8,10 +8,12 @@ export default class AuroraAPI {
     messageEmitter: MessageEmitter;
     socket?: AuroraWebSocket;
     constructor();
-    connect(url: string, callback?: (error: null | WebSocketErrorEvent, api?: AuroraAPI) => void): void | Promise<AuroraAPI | WebSocketErrorEvent>;
+    connect(url: string, callback: (error: null | WebSocketErrorEvent, api?: AuroraAPI) => void): void;
+    connect(url: string): Promise<AuroraAPI | WebSocketErrorEvent>;
     close(code?: number, data?: string): void;
     hasConnected(): boolean;
-    send(type: string, data?: object, callback?: (error: null | ResponseError, data?: Response) => void): void | Promise<Response | ResponseError>;
+    send(type: string, data: object | undefined, callback: (error: null | ResponseError, data?: Response) => void): void;
+    send(type: string, data?: object): Promise<Response | ResponseError>;
     onOpen(): void;
     onClose(event: WebSocket.CloseEvent): void;
     onMessage(this: AuroraWebSocket, event: WebSocketMessageEvent): void;

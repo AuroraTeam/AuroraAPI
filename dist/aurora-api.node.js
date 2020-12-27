@@ -4382,7 +4382,7 @@ class AuroraAPI {
             return false;
         return this.socket.readyState === this.socket.OPEN;
     }
-    send(type, data, callback) {
+    send(type, data = {}, callback) {
         if (!this.socket)
             return console.error("WebSocket not connected");
         const obj = {
