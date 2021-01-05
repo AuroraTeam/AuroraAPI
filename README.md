@@ -85,6 +85,8 @@ api.connect('ws://localhost:1370/') // Подключение к сокету л
 })();
 ```
 
+Также библиотека поддерживает работу с TypeScript
+
 Более подробные примеры использования можно найти [здесь](https://github.com/AuroraTeam/AuroraAPI/tree/master/example)
 
 ## Методы и параметры

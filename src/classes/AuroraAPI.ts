@@ -18,17 +18,12 @@ export default class AuroraAPI {
      * @param url Адрес API
      * @param callback Функция обратного вызова (обработка подключения)
      */
-    connect(
-        url: string,
-        callback: (error: null | WebSocketErrorEvent, api?: AuroraAPI) => void
-    ): void
+    connect(url: string, callback: (error: null | WebSocketErrorEvent, api?: AuroraAPI) => void): void
     /**
      * Подключение к API (Promise style)
      * @param url Адрес API
      */
-    connect(
-        url: string
-    ): Promise<AuroraAPI | WebSocketErrorEvent>
+    connect(url: string): Promise<AuroraAPI | WebSocketErrorEvent>
 
     connect(
         url: string,
@@ -78,20 +73,13 @@ export default class AuroraAPI {
      * @param data Данные
      * @param callback Функция обратного вызова (обработка ответа)
      */
-    send(
-        type: string,
-        data: object | undefined,
-        callback: (error: null | ResponseError, data?: Response) => void
-    ): void
+    send(type: string, data: object | undefined, callback: (error: null | ResponseError, data?: Response) => void): void
     /**
      * Отправка запроса (Promise style)
      * @param type Тип реквеста
      * @param data Данные
      */
-    send(
-        type: string,
-        data?: object,
-    ): Promise<Response | ResponseError>
+    send(type: string, data?: object): Promise<Response | ResponseError>
 
     send(
         type: string,

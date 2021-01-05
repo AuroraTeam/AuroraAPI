@@ -28,7 +28,7 @@ api.onError = () => {
 (async () => {
     try {
         await api.connect(wsUrl);
-        const test = await api.send('ping', {});
+        const test = await api.send('ping');
         log.appendData(test);
     } catch (error) {
         log.appendData(error);
