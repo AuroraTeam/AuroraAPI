@@ -30,7 +30,7 @@ npm i aurora-api
 
 ```js
 // Подключение класса API
-const AuroraAPI = require('aurora-api').AuroraAPI;
+const { AuroraAPI } = require('aurora-api');
 
 // Инициализация класса API
 const api = new AuroraAPI();

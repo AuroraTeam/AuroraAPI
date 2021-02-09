@@ -1,4 +1,4 @@
-const AuroraAPI = require('aurora-api').AuroraAPI;
+const { AuroraAPI } = require('aurora-api');
 
 // User data
 const wsUrl = 'ws://localhost:1370/';
