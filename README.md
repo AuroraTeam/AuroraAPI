@@ -3,6 +3,7 @@
 [![GitHub license](https://img.shields.io/github/license/AuroraTeam/AuroraAPI?style=flat-square)](https://github.com/AuroraTeam/AuroraAPI/blob/master/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/AuroraTeam/AuroraAPI?style=flat-square)](https://github.com/AuroraTeam/AuroraAPI/issues)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FAuroraTeam%2FAuroraAPI.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FAuroraTeam%2FAuroraAPI?ref=badge_shield)
 
 Реализация JS / TS API для [Aurora Launcher](https://github.com/AuroraTeam/Launcher)
 
@@ -110,3 +111,6 @@ api.connect('ws://localhost:1370/') // Подключение к сокету л
 * `onClose()` - обработчик эвента [onclose](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/onclose)
 * `onMessage()` - обработчик эвента [onmessage](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/onmessage)
 * `onError()` - обработчик эвента [onerror](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/onerror)
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FAuroraTeam%2FAuroraAPI.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FAuroraTeam%2FAuroraAPI?ref=badge_large)
