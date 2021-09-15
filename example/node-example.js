@@ -1,18 +1,18 @@
-const { AuroraAPI } = require('aurora-api');
+const { AuroraAPI } = require("../dist/aurora-api.node")
 
 // User data
-const wsUrl = 'ws://localhost:1370/';
+const wsUrl = "ws://localhost:1370/ws"
 
 // Api usage example
-const api = new AuroraAPI();
-(async () => {
+const api = new AuroraAPI(wsUrl)
+;(async () => {
     try {
-        await api.connect(wsUrl);
-        const test = await api.send('ping');
-        console.log(test);
+        await api.ready()
+        const test = await api.send("ping")
+        console.log(test)
     } catch (error) {
-        console.error(error);
+        console.error(error)
     } finally {
-        api.close();
+        api.close()
     }
-})();
+})()

@@ -1,38 +1,36 @@
 // User data
-const wsUrl = 'ws://localhost:1370/';
+const wsUrl = "ws://localhost:1370/ws"
 
 // Log helper
 const log = {
-    el: document.getElementById('log'),
     append(message) {
-        this.el.append(`${message}\n`);
+        document.getElementById("log").append(`${message}\n`)
     },
     appendData(data) {
-        this.append(JSON.stringify(data));
-    }
+        this.append(JSON.stringify(data))
+    },
 }
 
 // Api usage example
-const api = new AuroraAPI();
+const api = new AuroraAPI(wsUrl)
 api.onOpen = () => {
-    log.append('Соединение установлено');
+    log.append("Соединение установлено")
 }
 api.onClose = (e) => {
-    if (e.wasClean) return log.append('Соединение закрыто');
-    if (e.code === 1006) log.append('Разрыв соединения');
+    if (e.wasClean) return log.append("Соединение закрыто")
+    if (e.code === 1006) log.append("Разрыв соединения")
 }
 api.onError = () => {
-    log.append('Ошибка при подключении!');
+    log.append("Ошибка при подключении!")
 }
-
-(async () => {
+;(async () => {
     try {
-        await api.connect(wsUrl);
-        const test = await api.send('ping');
-        log.appendData(test);
+        await api.ready()
+        const test = await api.send("ping")
+        log.appendData(test)
     } catch (error) {
-        log.appendData(error);
+        log.appendData(error)
     } finally {
-        api.close();
+        api.close()
     }
-})();
+})()

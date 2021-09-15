@@ -1,26 +1,15 @@
 /// <reference types="ws" />
 import * as WebSocket from "isomorphic-ws";
 import { Response, ResponseError } from "../types/Response";
-import { WebSocketErrorEvent, WebSocketMessageEvent } from "../types/WebSocket";
-import AuroraWebSocket from "./AuroraWebSocket";
 import MessageEmitter from "./MessageEmitter";
 export default class AuroraAPI {
-    messageEmitter: MessageEmitter;
-    socket?: AuroraWebSocket;
-    constructor();
-    /**
-     * Подключение к API (Callback style)
-     * @param url Адрес API
-     * @param callback Функция обратного вызова (обработка подключения)
-     */
-    connect(url: string, callback: (error: null | WebSocketErrorEvent, api?: AuroraAPI) => void): void;
-    /**
-     * Подключение к API (Promise style)
-     * @param url Адрес API
-     */
-    connect(url: string): Promise<AuroraAPI | WebSocketErrorEvent>;
+    _messageEmitter: MessageEmitter;
+    _socket: WebSocket;
+    _ready: () => void;
+    constructor(url: string);
     close(code?: number, data?: string): void;
     hasConnected(): boolean;
+    ready(): Promise<unknown>;
     /**
      * Отправка запроса (Callback style)
      * @param type Тип реквеста
@@ -34,8 +23,8 @@ export default class AuroraAPI {
      * @param data Данные
      */
     send(type: string, data?: object): Promise<Response | ResponseError>;
-    onOpen(): void;
-    onClose(event: WebSocket.CloseEvent): void;
-    onMessage(this: AuroraWebSocket, event: WebSocketMessageEvent): void;
-    onError(event: WebSocketErrorEvent): void;
+    onOpen(_event: WebSocket.OpenEvent | Event): void;
+    onClose(event: WebSocket.CloseEvent | CloseEvent): void;
+    onMessage(event: WebSocket.MessageEvent | MessageEvent): void;
+    onError(event: WebSocket.ErrorEvent | Event): void;
 }

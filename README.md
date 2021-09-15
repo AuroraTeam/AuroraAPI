@@ -1,4 +1,5 @@
 # AuroraAPI
+
 [![npm](https://img.shields.io/npm/v/aurora-api?style=flat-square)](https://www.npmjs.com/package/aurora-api)
 [![GitHub license](https://img.shields.io/github/license/AuroraTeam/AuroraAPI?style=flat-square)](https://github.com/AuroraTeam/AuroraAPI/blob/master/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/AuroraTeam/AuroraAPI?style=flat-square)](https://github.com/AuroraTeam/AuroraAPI/issues)
@@ -32,49 +33,41 @@ npm i aurora-api
 // Подключение класса API
 const { AuroraAPI } = require('aurora-api');
 
-// Инициализация класса API
-const api = new AuroraAPI();
+// Инициализация класса API и создание подключения к вебсокету
+const api = new AuroraAPI('ws://localhost:1370/ws');
 
-// Подключение и отправка/обработка запросов с использованием колбеков
+// TODO а чё с коллбеками то делать? api.ready()
 
-api.connect('ws://localhost:1370/', (error) => { // Подключение к сокету лаунчсервера
+// Отправка/обработка запросов с использованием колбеков
+
+api.send('ping', (error, result) => { // Запрос к API лаунчер сервера
     if (error) {
         console.error(error);
-        api.close(); // Закрытие соединения
-        return;
+        return api.close();
     }
-    api.send('ping', (error, result) => { //Запрос к API лаунчер сервера
-        if (error) {
-            console.error(error);
-            api.close();
-            return;
-        }
-        console.log(result);
-        api.close();
-    });
+    console.log(result);
+    api.close();
 });
 
 // в стиле Promise
 
-api.connect('ws://localhost:1370/') // Подключение к сокету лаунчсервера
+api.ready() // Ожидание подключения к сокету лаунчсервера
 .then(() => {
-    api.send('ping').then(result => { //Запрос списка методов авторизации
+    api.send('ping').then(result => { // Запрос к API лаунчер сервера
         console.log(result);
-        api.close(); // Закрытие соединения
     }).catch((error) => {
         console.error(error);
-        api.close();
     });
+    api.close(); // Закрытие соединения
 }).catch((error) => {
     console.error(error);
-    api.close();
 });
 
 // или в стиле async/await
 
 (async () => {
     try {
-        await api.connect('ws://localhost:1370/');
+        await api.ready();
         const result = await api.send('ping');
         console.log(result);
     } catch (error) {
@@ -94,19 +87,18 @@ api.connect('ws://localhost:1370/') // Подключение к сокету л
 Класс `AuroraAPI` содержит следущее:
 
 Методы:
-* `connect(url, callback)` - подключение к сокету лаунчсервера, где:
-    * `url` - адрес сокета лаунчсервера
-    * `callback` - функция обратного вызова, которая используется для обработки подключения к сокету лаунчер сервара (при написании кода в Promise / async/await стиле не используется)
-* `close()` - отключение от сокета лаунчсервера
-* `send(type, obj, callback)` - отправка запроса к лаунчсерверу, где:
-    * `type` - тип запроса
-    * `obj` - объект с параметрами запроса
-    * `callback` - функция обратного вызова, которая используется для обработки ответа на запрос (при написании кода в Promise / async/await стиле не используется)
-* `close()` - отключение от сокета лаунчсервера
-* `hasConnected()` - проверка на наличие подключения к сокету лаунчер серверу
+
+-   `ready()` - функция ожидания подключения к сокету лаунчсервера
+-   `close()` - отключение от сокета лаунчсервера
+-   `hasConnected()` - проверка на наличие подключения к сокету лаунчер серверу
+-   `send(type, obj, callback)` - отправка запроса к лаунчсерверу, где:
+    -   `type` - тип запроса
+    -   `obj` - объект с параметрами запроса
+    -   `callback` - функция обратного вызова, которая используется для обработки ответа на запрос, при написании кода в Promise стиле. В async/await стиле не используется
 
 Эвенты (стандартные эвенты [вебсокета](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket)):
-* `onOpen()` - обработчик эвента [onopen](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/onopen)
-* `onClose()` - обработчик эвента [onclose](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/onclose)
-* `onMessage()` - обработчик эвента [onmessage](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/onmessage)
-* `onError()` - обработчик эвента [onerror](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/onerror)
+
+-   `onOpen()` - обработчик эвента [onopen](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/onopen)
+-   `onClose()` - обработчик эвента [onclose](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/onclose)
+-   `onMessage()` - обработчик эвента [onmessage](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/onmessage)
+-   `onError()` - обработчик эвента [onerror](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/onerror)

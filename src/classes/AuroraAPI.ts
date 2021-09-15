@@ -3,68 +3,42 @@ import { v4 as uuidv4 } from "uuid"
 
 import { Request } from "../types/Request"
 import { Response, ResponseError } from "../types/Response"
-import { WebSocketErrorEvent, WebSocketMessageEvent } from "../types/WebSocket"
-import AuroraWebSocket from "./AuroraWebSocket"
 import MessageEmitter from "./MessageEmitter"
 
 export default class AuroraAPI {
-    messageEmitter: MessageEmitter = new MessageEmitter()
-    socket?: AuroraWebSocket
+    _messageEmitter: MessageEmitter = new MessageEmitter()
+    _socket: WebSocket
+    _ready = () => {}
+    // можно расмотреть использование приватныйх полей через #
+    // https://github.com/tc39/proposal-class-fields/blob/master/PRIVATE_SYNTAX_FAQ.md
 
-    constructor() {} // Так надо :D
-
-    /**
-     * Подключение к API (Callback style)
-     * @param url Адрес API
-     * @param callback Функция обратного вызова (обработка подключения)
-     */
-    connect(url: string, callback: (error: null | WebSocketErrorEvent, api?: AuroraAPI) => void): void
-    /**
-     * Подключение к API (Promise style)
-     * @param url Адрес API
-     */
-    connect(url: string): Promise<AuroraAPI | WebSocketErrorEvent>
-
-    connect(
-        url: string,
-        callback?: (error: null | WebSocketErrorEvent, api?: AuroraAPI) => void
-    ): void | Promise<AuroraAPI | WebSocketErrorEvent> {
-        this.socket = new AuroraWebSocket(url, this)
-        this.socket.onclose = this.onClose
-        this.socket.onmessage = this.onMessage
-
-        if (callback !== undefined) {
-            // Callback style
-            this.socket.onopen = () => {
-                this.onOpen()
-                callback(null, this)
-            }
-            this.socket.onerror = (error) => {
-                this.onError(error)
-                callback(error)
-            }
-        } else {
-            // Promise style
-            return new Promise((resolve, reject) => {
-                ;(this.socket as AuroraWebSocket).onopen = () => {
-                    this.onOpen()
-                    resolve(this)
-                }
-                ;(this.socket as AuroraWebSocket).onerror = (err) => {
-                    this.onError(err)
-                    reject(err)
-                }
-            })
+    constructor(url: string) {
+        this._socket = new WebSocket(url)
+        this._socket.onclose = (event) => this.onClose(event)
+        this._socket.onerror = (event) => this.onError(event)
+        this._socket.onmessage = (event) => this.onMessage(event)
+        this._socket.onopen = (event) => {
+            this.onOpen(event)
+            this._ready()
         }
     }
 
-    close(code?: number, data?: string): void {
-        if (this.socket) this.socket.close(code, data)
+    // reopen?
+    public close(code?: number, data?: string): void {
+        this._socket.close(code, data)
     }
 
-    hasConnected(): boolean {
-        if (!this.socket) return false
-        return this.socket.readyState === this.socket.OPEN
+    public hasConnected(): boolean {
+        return this._socket.readyState === this._socket.OPEN
+    }
+
+    public async ready() {
+        if (this.hasConnected()) return true
+        return await new Promise((resolve) => {
+            this._ready = () => {
+                resolve(true)
+            }
+        })
     }
 
     /**
@@ -73,20 +47,24 @@ export default class AuroraAPI {
      * @param data Данные
      * @param callback Функция обратного вызова (обработка ответа)
      */
-    send(type: string, data: object | undefined, callback: (error: null | ResponseError, data?: Response) => void): void
+    public send(
+        type: string,
+        data: object | undefined,
+        callback: (error: null | ResponseError, data?: Response) => void
+    ): void
     /**
      * Отправка запроса (Promise style)
      * @param type Тип реквеста
      * @param data Данные
      */
-    send(type: string, data?: object): Promise<Response | ResponseError>
+    public send(type: string, data?: object): Promise<Response | ResponseError>
 
-    send(
+    public send(
         type: string,
         data: object = {},
         callback?: (error: null | ResponseError, data?: Response) => void
     ): void | Promise<Response | ResponseError> {
-        if (!this.socket) return console.error("WebSocket not connected")
+        if (!this._socket) return console.error("WebSocket not connected")
 
         const obj: Request = {
             type: type,
@@ -94,17 +72,17 @@ export default class AuroraAPI {
             data: data,
         }
 
-        this.socket.send(JSON.stringify(obj))
+        this._socket.send(JSON.stringify(obj))
         if (callback !== undefined) {
             // Callback style
-            this.messageEmitter.addListener(obj.uuid, (data: Response | ResponseError): void => {
+            this._messageEmitter.addListener(obj.uuid, (data: Response | ResponseError): void => {
                 if ((data as ResponseError).code !== undefined) callback(data as ResponseError)
                 else callback(null, data as Response)
             })
         } else {
             // Promise style
             return new Promise((resolve, reject) => {
-                this.messageEmitter.addListener(obj.uuid, (data: Response | ResponseError): void => {
+                this._messageEmitter.addListener(obj.uuid, (data: Response | ResponseError): void => {
                     if ((data as ResponseError).code !== undefined) reject(data as ResponseError)
                     else resolve(data as Response)
                 })
@@ -113,11 +91,11 @@ export default class AuroraAPI {
     }
 
     /* Events */
-    onOpen(): void {
+    public onOpen(_event: WebSocket.OpenEvent | Event): void {
         console.log("Connection established")
     }
 
-    onClose(event: WebSocket.CloseEvent) {
+    public onClose(event: WebSocket.CloseEvent | CloseEvent) {
         if (event.wasClean) return console.log("Connection closed")
         if (event.code === 1006) console.error("Break connection")
         else {
@@ -126,11 +104,11 @@ export default class AuroraAPI {
         }
     }
 
-    onMessage(this: AuroraWebSocket, event: WebSocketMessageEvent) {
-        this.api.messageEmitter.emit(JSON.parse(event.data as string))
+    public onMessage(event: WebSocket.MessageEvent | MessageEvent) {
+        this._messageEmitter.emit(JSON.parse(event.data as string))
     }
 
-    onError(event: WebSocketErrorEvent) {
+    public onError(event: WebSocket.ErrorEvent | Event) {
         console.error("WebSocket error observed:", event)
     }
 }
