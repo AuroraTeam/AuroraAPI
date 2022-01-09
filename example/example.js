@@ -12,19 +12,20 @@ const log = {
 }
 
 // Api usage example
-const api = new AuroraAPI(wsUrl)
-api.onOpen = () => {
-    log.append("Соединение установлено")
-}
-api.onClose = (e) => {
-    if (e.wasClean) return log.append("Соединение закрыто")
-    if (e.code === 1006) log.append("Разрыв соединения")
-}
-api.onError = () => {
-    log.append("Ошибка при подключении!")
-}
 ;(async () => {
     try {
+        const api = new AuroraAPI(wsUrl, {
+            onOpen: () => {
+                log.append("Соединение установлено")
+            },
+            onClose: (event) => {
+                if (event.wasClean) return log.append("Соединение закрыто")
+                if (event.code === 1006) log.append("Разрыв соединения")
+            },
+            onError: () => {
+                log.append("Ошибка при подключении!")
+            },
+        })
         await api.ready()
         const test = await api.send("ping")
         log.appendData(test)

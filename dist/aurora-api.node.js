@@ -28,32 +28,24 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var isomorphic_ws__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(isomorphic_ws__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var uuid__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! uuid */ "./node_modules/uuid/dist/esm-node/v4.js");
 /* harmony import */ var _MessageEmitter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MessageEmitter */ "./src/classes/MessageEmitter.ts");
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 
 
 
+// Можно рассмотреть использование приватных полей через #
+// https://github.com/tc39/proposal-class-fields/blob/master/PRIVATE_SYNTAX_FAQ.md
+// У вебпака есть свои приколы на этот счёт, мб заменить его к чёрту?))
+// + logger settings
 class AuroraAPI {
-    // можно расмотреть использование приватныйх полей через #
-    // https://github.com/tc39/proposal-class-fields/blob/master/PRIVATE_SYNTAX_FAQ.md
-    constructor(url) {
+    constructor(url, events) {
         this._messageEmitter = new _MessageEmitter__WEBPACK_IMPORTED_MODULE_1__["default"]();
-        this._ready = () => { };
-        this._socket = new isomorphic_ws__WEBPACK_IMPORTED_MODULE_0__(url);
-        this._socket.onclose = (event) => this.onClose(event);
-        this._socket.onerror = (event) => this.onError(event);
-        this._socket.onmessage = (event) => this.onMessage(event);
-        this._socket.onopen = (event) => {
-            this.onOpen(event);
-            this._ready();
+        this._ready = () => {
+            console.error("[AuroraAPI] If you see this message, tell the developer of the `aurora-api` library that he is the creator of the crutches.");
         };
+        this._socket = new isomorphic_ws__WEBPACK_IMPORTED_MODULE_0__(url);
+        this._socket.onclose = (event) => this.onClose(event, events?.onClose);
+        this._socket.onerror = (event) => this.onError(event, events?.onError);
+        this._socket.onmessage = (event) => this.onMessage(event, events?.onMessage);
+        this._socket.onopen = (event) => this.onOpen(event, events?.onOpen);
     }
     // reopen?
     close(code, data) {
@@ -62,66 +54,64 @@ class AuroraAPI {
     hasConnected() {
         return this._socket.readyState === this._socket.OPEN;
     }
-    ready() {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (this.hasConnected())
-                return true;
-            return yield new Promise((resolve) => {
-                this._ready = () => {
-                    resolve(true);
-                };
-            });
+    async ready() {
+        if (this.hasConnected())
+            return true;
+        return await new Promise((resolve) => {
+            this._ready = () => {
+                resolve(true);
+            };
         });
     }
     send(type, data = {}, callback) {
-        if (!this._socket)
-            return console.error("WebSocket not connected");
-        const obj = {
-            type: type,
-            uuid: (0,uuid__WEBPACK_IMPORTED_MODULE_2__["default"])(),
-            data: data,
-        };
-        this._socket.send(JSON.stringify(obj));
-        if (callback !== undefined) {
-            // Callback style
-            this._messageEmitter.addListener(obj.uuid, (data) => {
-                if (data.code !== undefined)
-                    callback(data);
-                else
-                    callback(null, data);
-            });
-        }
-        else {
+        if (!this.hasConnected())
+            return console.error("[AuroraAPI] WebSocket not connected");
+        const uuid = (0,uuid__WEBPACK_IMPORTED_MODULE_2__["default"])();
+        this._socket.send(JSON.stringify({ type, uuid, data }));
+        if (callback === undefined)
             // Promise style
             return new Promise((resolve, reject) => {
-                this._messageEmitter.addListener(obj.uuid, (data) => {
+                this._messageEmitter.addListener(uuid, (data) => {
                     if (data.code !== undefined)
                         reject(data);
                     else
                         resolve(data);
                 });
             });
-        }
+        // Callback style
+        this._messageEmitter.addListener(uuid, (data) => {
+            if (data.code !== undefined)
+                callback(data);
+            else
+                callback(null, data);
+        });
     }
     /* Events */
-    onOpen(_event) {
-        console.log("Connection established");
+    onOpen(event, eventListener) {
+        console.log("[AuroraAPI] Connection established");
+        this._ready();
+        if (eventListener)
+            eventListener(event);
     }
-    onClose(event) {
+    onClose(event, eventListener) {
         if (event.wasClean)
-            return console.log("Connection closed");
+            return console.log("[AuroraAPI] Connection closed");
         if (event.code === 1006)
-            console.error("Break connection");
-        else {
-            console.error("Unknown error");
-            console.dir(event);
-        }
+            console.error("[AuroraAPI] Break connection");
+        else
+            console.error("[AuroraAPI] Unknown error", event);
+        if (eventListener)
+            eventListener(event);
     }
-    onMessage(event) {
+    onMessage(event, eventListener) {
         this._messageEmitter.emit(JSON.parse(event.data));
+        if (eventListener)
+            eventListener(event);
     }
-    onError(event) {
-        console.error("WebSocket error observed:", event);
+    onError(event, eventListener) {
+        console.error("[AuroraAPI] WebSocket error observed:", event);
+        if (eventListener)
+            eventListener(event);
     }
 }
 
@@ -146,17 +136,12 @@ class MessageEmitter {
         this.listeners.set(uuid, listener);
     }
     emit(data) {
-        if (data.uuid !== undefined && this.listeners.has(data.uuid)) {
-            ;
-            this.listeners.get(data.uuid)(data);
-            this.listeners.delete(data.uuid);
-        }
-        else {
-            if (data.code !== undefined)
-                console.error(data);
-            else
-                console.dir(data);
-        }
+        if (data.uuid === undefined)
+            return console.error("[AuroraAPI] Broken request: ", data);
+        if (!this.listeners.has(data.uuid))
+            return console.error("[AuroraAPI] Unhandled request: ", data);
+        this.listeners.get(data.uuid)(data);
+        this.listeners.delete(data.uuid);
     }
 }
 

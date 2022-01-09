@@ -1,12 +1,16 @@
 /// <reference types="ws" />
 import * as WebSocket from "isomorphic-ws";
 import { Response, ResponseError } from "../types/Response";
-import MessageEmitter from "./MessageEmitter";
 export default class AuroraAPI {
-    _messageEmitter: MessageEmitter;
-    _socket: WebSocket;
-    _ready: () => void;
-    constructor(url: string);
+    private _messageEmitter;
+    private _socket;
+    private _ready;
+    constructor(url: string, events?: {
+        onClose?: (event: WebSocket.CloseEvent | CloseEvent) => void;
+        onError?: (event: WebSocket.ErrorEvent | Event) => void;
+        onMessage?: (event: WebSocket.MessageEvent | MessageEvent) => void;
+        onOpen?: (event: WebSocket.OpenEvent | Event) => void;
+    });
     close(code?: number, data?: string): void;
     hasConnected(): boolean;
     ready(): Promise<unknown>;
@@ -21,10 +25,11 @@ export default class AuroraAPI {
      * Отправка запроса (Promise style)
      * @param type Тип реквеста
      * @param data Данные
+     * @throws {ResponseError}
      */
-    send(type: string, data?: object): Promise<Response | ResponseError>;
-    onOpen(_event: WebSocket.OpenEvent | Event): void;
-    onClose(event: WebSocket.CloseEvent | CloseEvent): void;
-    onMessage(event: WebSocket.MessageEvent | MessageEvent): void;
-    onError(event: WebSocket.ErrorEvent | Event): void;
+    send(type: string, data?: object): Promise<Response>;
+    private onOpen;
+    private onClose;
+    private onMessage;
+    private onError;
 }
