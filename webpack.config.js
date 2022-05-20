@@ -1,65 +1,71 @@
-const path = require('path')
+const path = require("path")
 
 // Web
-let mode = [{
-    mode: 'production',
-    devtool: 'source-map',
-    filename: 'aurora-api.min.js',
-},{
-    mode: 'development',
-    devtool: 'inline-source-map',
-    filename: 'aurora-api.js',
-}]
+let mode = [
+    {
+        mode: "production",
+        devtool: "source-map",
+        filename: "aurora-api.min.js",
+    },
+    {
+        mode: "development",
+        devtool: "inline-source-map",
+        filename: "aurora-api.js",
+    },
+]
 
-mode = mode.map(c => {
+mode = mode.map((c) => {
     return {
+        experiments: {
+            outputModule: true,
+        },
         mode: c.mode,
         devtool: c.devtool,
-        target: 'web',
-        entry: path.resolve(__dirname, 'src', 'index.ts'),
+        target: "web",
+        entry: path.resolve(__dirname, "src", "index.ts"),
         output: {
-            path: path.resolve(__dirname, 'dist'),
+            path: path.resolve(__dirname, "dist"),
             filename: c.filename,
-            library: 'AuroraAPI',
-            libraryExport: 'AuroraAPI',
-            libraryTarget: 'umd'
+            // library: "AuroraAPISocket",
+            libraryExport: "AuroraAPISocket",
+            libraryTarget: "module",
         },
         resolve: {
-            extensions: [ '.ts', '.js' ],
+            extensions: [".ts", ".js"],
         },
         module: {
             rules: [
                 {
                     test: /\.ts$/,
-                    loader: "ts-loader"
-                }
-            ]
-        }
+                    loader: "ts-loader",
+                },
+            ],
+        },
     }
 })
 
 // Node
 mode.push({
-    mode: 'development',
-    devtool: 'source-map',
-    target: 'node',
-    entry: path.resolve(__dirname, 'src', 'index.ts'),
+    mode: "development",
+    devtool: "source-map",
+    target: "node",
+    entry: path.resolve(__dirname, "src", "index.ts"),
     output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: 'aurora-api.node.js',
-        libraryTarget: 'commonjs'
+        path: path.resolve(__dirname, "dist"),
+        filename: "aurora-api.node.js",
+        libraryTarget: "commonjs",
     },
     resolve: {
-        extensions: [ '.ts', '.js' ],
+        extensions: [".ts", ".js"],
     },
     module: {
         rules: [
             {
                 test: /\.ts$/,
-                loader: "ts-loader"
-            }
-        ]
-    }
+                loader: "ts-loader",
+            },
+        ],
+    },
 })
 
 module.exports = mode

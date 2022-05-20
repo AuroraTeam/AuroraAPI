@@ -1,17 +1,23 @@
 {
     "name": "aurora-api",
-    "version": "0.2.0-beta.2",
+    "version": "0.2.0-beta.3",
     "description": "JS/TS API implementation for Aurora Launcher",
-    "main": "./dist/aurora-api.node.js",
-    "browser": "./dist/aurora-api.min.js",
+    "main": "./dist/aurora-api-node.cjs",
+    "browser": "./dist/aurora-api-web.js",
     "types": "./dist/types/index.d.ts",
+    "exports": {
+        "browser": "./dist/aurora-api-web.js",
+        "import": "./dist/aurora-api-node.mjs",
+        "require": "./dist/aurora-api-node.cjs"
+    },
     "scripts": {
         "test": "node example/node-example.js",
+        "build:new": "node build.js && tsc --emitDeclarationOnly",
         "build": "rimraf dist && webpack",
         "watch": "rimraf dist && webpack --watch",
         "prepublishOnly": "npm run build",
         "release": "npm publish .",
-        "prettier": "prettier --config .prettierrc.json --write \"src/**/*.*\""
+        "prettier": "prettier --write src"
     },
     "repository": {
         "type": "git",
@@ -27,14 +33,14 @@
     },
     "homepage": "https://github.com/AuroraTeam/AuroraAPI#readme",
     "dependencies": {
-        "isomorphic-ws": "^4.0.1",
+        "modern-isomorphic-ws": "^1.0.1",
         "uuid": "^8.3.2",
         "ws": "^8.2.2"
     },
     "devDependencies": {
         "@types/uuid": "^8.3.1",
-        "@types/ws": "^7.4.7",
-        "esbuild": "^0.12.26",
+        "@types/ws": "^8.5.3",
+        "esbuild": "^0.14.38",
         "import-sort-style-module": "^6.0.0",
         "prettier": "^2.4.0",
         "prettier-plugin-import-sort": "0.0.7",
@@ -52,5 +58,9 @@
             "style": "module",
             "parser": "typescript"
         }
+    },
+    "optionalDependencies": {
+        "bufferutil": "^4.0.6",
+        "utf-8-validate": "^5.0.9"
     }
 }

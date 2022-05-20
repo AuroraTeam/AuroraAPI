@@ -1,6 +1,6 @@
 export interface Response {
     uuid: string;
-    data: object;
+    data: ResponseData;
 }
 export interface ResponseError {
     uuid: string;
@@ -8,3 +8,4 @@ export interface ResponseError {
     message: string;
 }
 export declare type ResponseEvent = (data: Response | ResponseError) => void;
+export declare type ResponseData = object;

@@ -1,3 +1,5 @@
+import { AuroraAPISocket } from "../dist/aurora-api-web.js"
+
 // User data
 const wsUrl = "ws://localhost:1370/ws"
 
@@ -13,8 +15,9 @@ const log = {
 
 // Api usage example
 ;(async () => {
+    let api
     try {
-        const api = new AuroraAPI(wsUrl, {
+        api = new AuroraAPISocket(wsUrl, {
             onOpen: () => {
                 log.append("Соединение установлено")
             },
@@ -27,7 +30,7 @@ const log = {
             },
         })
         await api.ready()
-        const test = await api.send("ping")
+        const test = await api.send("servers")
         log.appendData(test)
     } catch (error) {
         log.appendData(error)

@@ -6,7 +6,8 @@
         "sourceMap": true,
         "declaration": true,
         "declarationDir": "dist/types",
-        "moduleResolution": "node"
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true
     },
     "include": ["src"]
 }
