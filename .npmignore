@@ -3,5 +3,4 @@ example
 .editorconfig
 .prettierrc.json
 tsconfig.json
-webpack.config.js
 src

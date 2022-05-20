@@ -1,4 +1,4 @@
-import { Response, ResponseData } from "../Response"
+import { Response } from "aurorarpc-client"
 
 export interface Server {
     ip: string
@@ -7,10 +7,10 @@ export interface Server {
     profileUUID: string
 }
 
-export interface ServersResponseData extends ResponseData {
+export interface ServersResponseData {
     servers: Server[]
 }
 
 export interface ServersResponse extends Response {
-    data: ServersResponseData
+    result: ServersResponseData
 }

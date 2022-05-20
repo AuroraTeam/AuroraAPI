@@ -1,4 +1,4 @@
-import { Response, ResponseData } from "../Response"
+import { Response } from "aurorarpc-client"
 
 export interface Profile {
     //Don`t touch
@@ -30,10 +30,10 @@ export interface Profile {
     clientArgs: string[]
 }
 
-export interface ProfileResponseData extends ResponseData {
+export interface ProfileResponseData {
     profile: Profile
 }
 
 export interface ProfileResponse extends Response {
-    data: ProfileResponseData
+    result: ProfileResponseData
 }

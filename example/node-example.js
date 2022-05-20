@@ -1,4 +1,4 @@
-const { AuroraAPISocket } = require("../dist/aurora-api-node.cjs")
+const { AuroraAPI } = require("../dist/aurora-api-node.cjs")
 
 // User data
 const wsUrl = "ws://localhost:1370/ws"
@@ -7,9 +7,9 @@ const wsUrl = "ws://localhost:1370/ws"
 ;(async () => {
     let api
     try {
-        api = new AuroraAPISocket(wsUrl)
-        await api.ready()
-        const test = await api.send("servers")
+        api = new AuroraAPI(wsUrl)
+        await api.connect()
+        const test = await api.getServers()
         console.log(test)
     } catch (error) {
         console.error(error)

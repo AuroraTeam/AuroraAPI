@@ -1,40 +1,55 @@
-import { ResponseData } from "../types/Response"
-import { AuthResponseData } from "../types/response/AuthResponse"
-import { ProfileResponseData } from "../types/response/ProfileResponse"
-import { ServersResponseData } from "../types/response/ServersResponse"
-import { UpdatesResponseData } from "../types/response/UpdatesResponse"
+import { Client, Response, ResponseError } from "aurorarpc-client"
+
+import { AuthResponseData } from "../types/AuthResponse"
+import { ProfileResponseData } from "../types/ProfileResponse"
+import { ServersResponseData } from "../types/ServersResponse"
+import { UpdatesResponseData } from "../types/UpdatesResponse"
 import { APIError } from "./APIError"
-import { AuroraAPISocket, ResponseError } from ".."
 
 export class AuroraAPI {
-    apiInstance: AuroraAPISocket
+    #clientInstance: Client
+    #url?: string
 
-    constructor(url: string) {
-        this.apiInstance = new AuroraAPISocket(url)
+    constructor(url?: string) {
+        this.#url = url
+        this.#clientInstance = new Client()
+    }
+
+    public async connect(url?: string) {
+        const _url = url || this.#url
+        if (!_url) return
+
+        return await this.#clientInstance.connect(_url)
+    }
+
+    public close(code?: number, data?: string) {
+        this.#clientInstance.close(code, data)
     }
 
     public async auth(login: string, password: string) {
-        return <AuthResponseData>await this.getRequest("auth", { login, password })
+        return <AuthResponseData>await this.#getRequest("auth", { login, password })
     }
 
     public async getServers() {
-        return <ServersResponseData>await this.getRequest("servers")
+        return <ServersResponseData>await this.#getRequest("servers")
     }
 
     public async getProfile(uuid: string) {
-        return <ProfileResponseData>await this.getRequest("profile", { uuid })
+        return <ProfileResponseData>await this.#getRequest("profile", { uuid })
     }
 
     public async getUpdates(dir: string) {
-        return <UpdatesResponseData>await this.getRequest("updates", { dir })
+        return <UpdatesResponseData>await this.#getRequest("updates", { dir })
     }
 
-    private async getRequest<T extends ResponseData>(method: string, payload?: any): Promise<T> {
+    async #getRequest<T extends Response["result"]>(method: string, payload?: any): Promise<T> {
         try {
-            const { data } = await this.apiInstance.send(method, payload)
-            return <T>data
-        } catch (error) {
-            const { code, message } = <ResponseError>error
+            const { result } = await this.#clientInstance.send(method, payload)
+            return <T>result
+        } catch (err) {
+            const {
+                error: { code, message },
+            } = <ResponseError>err
             throw new APIError(code, message)
         }
     }

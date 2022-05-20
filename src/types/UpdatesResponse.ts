@@ -1,4 +1,4 @@
-import { Response, ResponseData } from "../Response"
+import { Response } from "aurorarpc-client"
 
 export interface HashedFile {
     path: string
@@ -6,10 +6,10 @@ export interface HashedFile {
     size: number
 }
 
-export interface UpdatesResponseData extends ResponseData {
+export interface UpdatesResponseData {
     hashes: HashedFile[]
 }
 
 export interface UpdatesResponse extends Response {
-    data: UpdatesResponseData
+    result: UpdatesResponseData
 }
