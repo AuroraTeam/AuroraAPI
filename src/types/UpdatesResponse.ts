@@ -1,4 +1,4 @@
-import { Response } from "aurorarpc-client"
+import { Response } from "aurora-rpc-client"
 
 export interface HashedFile {
     path: string

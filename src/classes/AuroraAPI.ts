@@ -1,4 +1,4 @@
-import { Client, Response, ResponseError } from "aurorarpc-client"
+import { Client, Response, ResponseError } from "aurora-rpc-client"
 
 import { AuthResponseData } from "../types/AuthResponse"
 import { ProfileResponseData } from "../types/ProfileResponse"
