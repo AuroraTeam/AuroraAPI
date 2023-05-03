@@ -1,8 +1,0 @@
-node_modules
-package-lock.json
-example
-.editorconfig
-.prettierrc.json
-tsconfig.json
-webpack.config.js
-src
